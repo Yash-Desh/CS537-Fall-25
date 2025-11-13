@@ -27,7 +27,7 @@ typedef struct {
 
 // Access internal rwlock_t fields for testing
 static int get_readers_count(rwlock_t *rw) {
-  return rw->readers;
+  return rw->readers_active;
 }
 
 // State validation (for writers only - they should have exclusive access)

@@ -27,7 +27,17 @@ void rw_rlock(rwlock_t *rw) {
      * - Increment reader count
      * - Use proper mutex locking
      */
-    (void)rw;  // Remove this when you implement the function
+    // (void)rw;  // Remove this when you implement the function
+    pthread_mutex_lock(&rw->m);
+    if(rw->writer_active + rw->writers_waiting == 0) {
+      rw->readers_active++;
+      sem_post(&rw->OKToRead);
+    }
+    else {
+      rw->readers_waiting++;
+    }
+    pthread_mutex_unlock(&rw->m);
+    sem_wait(&rw->OKToRead);
 }
 
 void rw_runlock(rwlock_t *rw) {
@@ -36,7 +46,15 @@ void rw_runlock(rwlock_t *rw) {
      * - Signal waiting writers if this is the last reader
      * - Use proper mutex locking
      */
-    (void)rw;  // Remove this when you implement the function
+    // (void)rw;  // Remove this when you implement the function
+    pthread_mutex_lock(&rw->m);
+    rw->readers_active--;
+    if(rw->readers_active == 0 && rw->writers_waiting > 0) {
+      rw->writers_waiting--;
+      rw->writer_active++;
+      sem_post(&rw->OKToWrite);
+    }
+    pthread_mutex_unlock(&rw->m);
 }
 
 void rw_wlock(rwlock_t *rw) {
@@ -46,7 +64,17 @@ void rw_wlock(rwlock_t *rw) {
      * - Set writer_active flag
      * - Use proper mutex locking and semaphores
      */
-    (void)rw;  // Remove this when you implement the function
+    // (void)rw;  // Remove this when you implement the function
+    pthread_mutex_lock(&rw->m);
+    if(rw->writer_active + rw->writers_waiting + rw->readers_active == 0) {
+      rw->writer_active++;
+      sem_post(&rw->OKToWrite);
+    }
+    else {
+      rw->writers_waiting++;
+    }
+    pthread_mutex_unlock(&rw->m);
+    sem_wait(&rw->OKToWrite);
 }
 
 void rw_wunlock(rwlock_t *rw) {
@@ -55,7 +83,22 @@ void rw_wunlock(rwlock_t *rw) {
      * - Signal waiting writers if any
      * - Use proper mutex locking
      */
-    (void)rw;  // Remove this when you implement the function
+    // (void)rw;  // Remove this when you implement the function
+    pthread_mutex_lock(&rw->m);
+    rw->writer_active--;
+    if(rw->writers_waiting > 0) {
+      rw->writers_waiting--;
+      rw->writer_active++;
+      sem_post(&rw->OKToWrite);
+    }
+    else {
+      while(rw->readers_waiting > 0) {
+        rw->readers_waiting--;
+        rw->readers_active++;
+        sem_post(&rw->OKToRead);
+      }
+    }
+    pthread_mutex_unlock(&rw->m);
 }
 
 static void* reader(void* arg) {

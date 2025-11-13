@@ -31,7 +31,14 @@ int rw_init(rwlock_t *rw) {
    * - Initialize semaphores
    * - Set initial counter values
    */
-  (void)rw;  // Remove this when you implement the function
+  // (void)rw;  // Remove this when you implement the function
+  pthread_mutex_init(&rw->m, NULL);
+  sem_init(&rw->OKToRead, 0, 0);
+  sem_init(&rw->OKToWrite, 0, 0);
+  rw->readers_active = 0;
+  rw->readers_waiting = 0;
+  rw->writer_active = 0;
+  rw->writers_waiting = 0;
   return 0;
 }
 
@@ -40,7 +47,10 @@ void rw_destroy(rwlock_t *rw) {
    * - Destroy mutex
    * - Destroy semaphores
    */
-  (void)rw;  // Remove this when you implement the function
+  // (void)rw;  // Remove this when you implement the function
+  pthread_mutex_destroy(&rw->m);
+  sem_destroy(&rw->OKToRead);
+  sem_destroy(&rw->OKToWrite);
 }
 /* RW lock functions are implemented in readers_writers.c */
 
@@ -74,8 +84,15 @@ int bb_init(bb_t *q, int capacity) {
    * - Initialize mutex
    * - Return 0 on success, -1 on failure
    */
-  (void)q;
-  (void)capacity;
+  // (void)q;
+  // (void)capacity;
+  q->buf = calloc(capacity, sizeof(food_tray_t*));
+  q->cap = capacity;
+  q->head = 0;
+  q->tail = 0;
+  sem_init(&q->empty, 0, capacity);
+  sem_init(&q->full, 0, 0);
+  pthread_mutex_init(&q->m, NULL);
   return 0;
 }
 
@@ -85,7 +102,11 @@ void bb_destroy(bb_t *q) {
    * - Destroy semaphores
    * - Free buffer array
    */
-  (void)q;
+  // (void)q;
+  sem_destroy(&q->full);
+  sem_destroy(&q->empty);
+  pthread_mutex_destroy(&q->m);
+  free(q->buf);
 }
 
 void bb_put(bb_t *q, food_tray_t *tray) {
@@ -97,8 +118,14 @@ void bb_put(bb_t *q, food_tray_t *tray) {
    * - Unlock mutex
    * - Post to full semaphore
    */
-  (void)q;
-  (void)tray;
+  // (void)q;
+  // (void)tray;
+  sem_wait(&q->empty);
+  pthread_mutex_lock(&q->m);
+  q->buf[q->tail] = tray;
+  q->tail = (q->tail + 1) % q->cap;
+  pthread_mutex_unlock(&q->m);
+  sem_post(&q->full);
 }
 
 food_tray_t* bb_take(bb_t *q) {
@@ -111,6 +138,13 @@ food_tray_t* bb_take(bb_t *q) {
    * - Post to empty semaphore
    * - Return the tray
    */
-  (void)q;
-  return NULL;
+  // (void)q;
+  food_tray_t *temp = NULL;
+  sem_wait(&q->full);
+  pthread_mutex_lock(&q->m);
+  temp = q->buf[q->head];
+  q->head = (q->head + 1) % q->cap;
+  pthread_mutex_unlock(&q->m);
+  sem_post(&q->empty);
+  return temp;
 }
