@@ -1,0 +1,2 @@
+#!/bin/bash
+(test -f ./test_bb_spsc_slow || (cd ../solution && make test_bb_spsc_slow > /dev/null 2>&1)) && timeout 20 ./test_bb_spsc_slow 2>&1 | grep -q "PASS" && echo "Test PASSED" || echo "Test FAILED"

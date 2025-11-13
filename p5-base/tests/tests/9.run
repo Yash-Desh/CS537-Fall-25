@@ -1,0 +1,2 @@
+#!/bin/bash
+(test -f ./test_bounded_buffer || (cd ../solution && make test_bounded_buffer > /dev/null 2>&1)) && timeout 10 ./test_bounded_buffer 2>&1 | grep -q "PASS" && echo "Test PASSED" || echo "Test FAILED"

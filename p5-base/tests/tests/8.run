@@ -1,0 +1,2 @@
+#!/bin/bash
+(test -f ./test_scenario || (cd ../solution && make test_scenario > /dev/null 2>&1)) && timeout 20 ./test_scenario 2>&1 | tee /tmp/test8.out | grep -q "No critical section violations detected" && grep -q "Final schedule_version correct" /tmp/test8.out && echo "Test PASSED" || echo "Test FAILED"

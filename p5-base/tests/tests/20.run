@@ -1,0 +1,2 @@
+#!/bin/bash
+(test -f ./test_bb_stress || (cd ../solution && make test_bb_stress > /dev/null 2>&1)) && timeout 60 ./test_bb_stress 2>&1 | grep -q "PASS" && echo "Stress test PASSED: No race conditions detected" || echo "Stress test FAILED: Race conditions, errors, or timeout"

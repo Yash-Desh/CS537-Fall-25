@@ -1,0 +1,2 @@
+#!/bin/bash
+(test -f ./test_rw_sequences || (cd ../solution && make test_rw_sequences > /dev/null 2>&1)) && ./test_rw_sequences 2>&1 | grep -E "R1->W1->R2->W2->R3" | tail -1 | grep -q "PASSED" && echo "Test PASSED" || echo "Test FAILED"

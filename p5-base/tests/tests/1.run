@@ -1,0 +1,4 @@
+#!/bin/bash
+cd ../solution && make clean > /dev/null 2>&1 && make all 2>&1 | grep -E "(error|Error)" && exit 1 || echo "Compilation successful"
+
+

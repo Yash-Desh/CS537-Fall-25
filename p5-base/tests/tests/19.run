@@ -1,0 +1,2 @@
+#!/bin/bash
+(test -f ./test_bb_sequences || (cd ../solution && make test_bb_sequences > /dev/null 2>&1)) && ./test_bb_sequences 2>&1 | grep -E "FIFO-P1->P2->P3->P4->C1->C2->C3->C4" | tail -1 | grep -q "PASSED" && echo "Test PASSED" || echo "Test FAILED"

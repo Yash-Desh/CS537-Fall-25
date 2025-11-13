@@ -1,0 +1,2 @@
+Bounded buffer sequence test: FIFO-P1->P2->P3->P4->C1->C2->C3->C4 (strict FIFO)
+

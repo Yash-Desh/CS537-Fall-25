@@ -1,0 +1,2 @@
+#!/bin/bash
+(test -f ./test_bb_single_thread || (cd ../solution && make test_bb_single_thread > /dev/null 2>&1)) && ./test_bb_single_thread 2>&1 | grep -q "PASS" && echo "Test PASSED" || echo "Test FAILED"

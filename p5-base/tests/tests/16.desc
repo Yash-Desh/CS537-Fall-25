@@ -1,0 +1,2 @@
+Bounded buffer sequence test: P1->P2->C1->C2 (FIFO ordering)
+

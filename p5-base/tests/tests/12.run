@@ -1,0 +1,2 @@
+#!/bin/bash
+(cd ../solution && make test_bb_sequences > /dev/null 2>&1) && test -f ./test_bb_sequences && echo "Test PASSED" || echo "Test FAILED"
